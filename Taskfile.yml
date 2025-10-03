@@ -14,6 +14,13 @@ tasks:
     env:
       PORT: "{{.PORT}}"
 
+  task:
+    desc: "Run Task (go-tasks) - requires Task to be installed"
+    cmds:
+      - go run github.com/go-task/task/v3/cmd/task@latest {{.CLI_ARGS}}
+    vars:
+      CLI_ARGS: ""
+
   build:
     desc: "Build the application"
     cmds:
@@ -42,23 +49,23 @@ tasks:
   db-migrate:
     desc: "Run database migrations"
     cmds:
-      - go run cmd/migrate/main.go -command=up
+      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations up
 
   db-rollback:
     desc: "Rollback database migrations"
     cmds:
-      - go run cmd/migrate/main.go -command=down
+      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations down
 
   db-status:
     desc: "Check migration status"
     cmds:
-      - go run cmd/migrate/main.go -command=status
+      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations status
 
   db-reset:
     desc: "Reset database (rollback all migrations)"
     cmds:
-      - go run cmd/migrate/main.go -command=down
-      - go run cmd/migrate/main.go -command=up
+      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations down
+      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations up
 
   # Docker tasks
   docker-build:
@@ -100,6 +107,12 @@ tasks:
     cmds:
       - go mod download
       - go mod tidy
+
+  install-tools:
+    desc: "Install Go tools (Task, Goose)"
+    cmds:
+      - go install github.com/go-task/task/v3/cmd/task@latest
+      - go install github.com/pressly/goose/v3/cmd/goose@latest
 
   # Cleanup tasks
   clean:

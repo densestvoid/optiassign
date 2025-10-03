@@ -38,10 +38,10 @@ func main() {
 	}
 	defer db.Close()
 
-	// Run migrations
-	if err := db.Migrate(db.GetDB(), "migrations"); err != nil {
-		log.Fatal("Failed to run migrations:", err)
-	}
+	// Run migrations using Goose directly
+	// Note: In production, migrations should be run separately
+	// For development, we'll skip auto-migration
+	log.Println("Note: Run 'task db-migrate' to apply database migrations")
 
 	// Initialize repositories
 	userRepo := db.NewUserRepository()

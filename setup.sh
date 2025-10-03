@@ -4,12 +4,17 @@
 
 echo "Setting up OptiAssign..."
 
-# Check if Task is installed
-if ! command -v task &> /dev/null; then
-    echo "❌ Task is not installed. Please install it first:"
-    echo "   https://taskfile.dev/installation/"
+# Check if Go is available
+if ! command -v go &> /dev/null; then
+    echo "❌ Go is not installed. Please install Go first:"
+    echo "   https://golang.org/dl/"
     exit 1
 fi
+
+# Install tools if needed
+echo "Installing Go tools..."
+go install github.com/go-task/task/v3/cmd/task@latest
+go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Check if .env file exists
 if [ ! -f .env ]; then
@@ -30,7 +35,7 @@ fi
 
 # Use Task for setup
 echo "Running development setup with Task..."
-task dev-setup
+go run github.com/go-task/task/v3/cmd/task@latest dev-setup
 
 echo "✅ Setup complete!"
 echo "🌐 Access the application at: http://localhost:8080"
