@@ -30,9 +30,12 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ Snaking draft assignment algorithm
 - ✅ Email invitation system
 - ✅ Assignment execution and results
-- ✅ **NEW**: Automatic assignment execution when last participant submits
-- ✅ **NEW**: Background task manager for assignment processing
-- ✅ **NEW**: Real-time assignment status tracking
+- ✅ Automatic assignment execution when last participant submits
+- ✅ Background task manager for assignment processing
+- ✅ Real-time assignment status tracking
+- ✅ **NEW**: Personalized email notifications with assigned items
+- ✅ **NEW**: Detailed item information in assignment emails
+- ✅ **NEW**: Enhanced email templates with item descriptions
 
 ## Setup
 

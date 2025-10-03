@@ -56,27 +56,10 @@ OptiAssign Team
 func (s *EmailService) SendAssignmentNotification(participant *Participant, group *Group, assignments []*Assignment, baseURL string) error {
 	subject := fmt.Sprintf("Assignment Complete: %s", group.Name)
 	
-	// Count items assigned to this participant
-	itemCount := 0
-	for _, assignment := range assignments {
-		if assignment.ParticipantID == participant.ID {
-			itemCount++
-		}
-	}
+	// Get items assigned to this participant
+	assignedItems := s.getAssignedItems(participant.ID, assignments)
 	
-	body := fmt.Sprintf(`
-Hello!
-
-The assignment for group "%s" has been completed.
-
-You have been assigned %d item(s).
-
-To view the full results, please visit:
-%s/participant/%s
-
-Best regards,
-OptiAssign Team
-`, group.Name, itemCount, baseURL, participant.Token)
+	body := s.generateAssignmentEmailBody(participant, group, assignedItems, baseURL)
 
 	if s.logToConsole {
 		log.Printf("=== EMAIL NOTIFICATION ===")
@@ -87,4 +70,44 @@ OptiAssign Team
 	}
 
 	return nil
+}
+
+// getAssignedItems returns items assigned to a specific participant
+func (s *EmailService) getAssignedItems(participantID int, assignments []*Assignment) []*Assignment {
+	var assignedItems []*Assignment
+	for _, assignment := range assignments {
+		if assignment.ParticipantID == participantID {
+			assignedItems = append(assignedItems, assignment)
+		}
+	}
+	return assignedItems
+}
+
+// generateAssignmentEmailBody creates the email body for assignment notifications
+func (s *EmailService) generateAssignmentEmailBody(participant *Participant, group *Group, assignedItems []*Assignment, baseURL string) string {
+	itemCount := len(assignedItems)
+	
+	body := fmt.Sprintf(`
+Hello!
+
+The assignment for group "%s" has been completed.
+
+You have been assigned %d item(s):
+
+`, group.Name, itemCount)
+
+	// Add assigned items list
+	for i, assignment := range assignedItems {
+		body += fmt.Sprintf("%d. Item ID: %d\n", i+1, assignment.ItemID)
+	}
+
+	body += fmt.Sprintf(`
+To view the full results and details, please visit:
+%s/participant/%s
+
+Best regards,
+OptiAssign Team
+`, baseURL, participant.Token)
+
+	return body
 }

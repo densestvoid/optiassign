@@ -12,6 +12,7 @@ type AssignmentTaskHandler struct {
 	emailService        *EmailService
 	groupRepo           GroupRepository
 	participantRepo     ParticipantRepository
+	itemRepo            ItemRepository
 	baseURL             string
 }
 
@@ -21,6 +22,7 @@ func NewAssignmentTaskHandler(
 	emailService *EmailService,
 	groupRepo GroupRepository,
 	participantRepo ParticipantRepository,
+	itemRepo ItemRepository,
 	baseURL string,
 ) *AssignmentTaskHandler {
 	return &AssignmentTaskHandler{
@@ -28,6 +30,7 @@ func NewAssignmentTaskHandler(
 		emailService:        emailService,
 		groupRepo:           groupRepo,
 		participantRepo:     participantRepo,
+		itemRepo:            itemRepo,
 		baseURL:             baseURL,
 	}
 }
@@ -61,9 +64,16 @@ func (h *AssignmentTaskHandler) Handle(ctx context.Context, task Task) error {
 		return nil // Don't fail the task for email issues
 	}
 
-	// Send email notifications
+	// Get items for detailed email content
+	items, err := h.itemRepo.GetByGroupID(groupID)
+	if err != nil {
+		log.Printf("Failed to get items for group %d: %v", groupID, err)
+		return nil // Don't fail the task for email issues
+	}
+
+	// Send personalized email notifications with item details
 	for _, participant := range participants {
-		if err := h.emailService.SendAssignmentNotification(participant, group, result.Assignments, h.baseURL); err != nil {
+		if err := h.sendPersonalizedAssignmentEmail(participant, group, result.Assignments, items); err != nil {
 			log.Printf("Failed to send email to participant %d: %v", participant.ID, err)
 			// Continue with other participants
 		}
@@ -71,4 +81,75 @@ func (h *AssignmentTaskHandler) Handle(ctx context.Context, task Task) error {
 
 	log.Printf("Assignment completed for group %d with %d assignments", groupID, len(result.Assignments))
 	return nil
+}
+
+// sendPersonalizedAssignmentEmail sends a personalized email with assigned items
+func (h *AssignmentTaskHandler) sendPersonalizedAssignmentEmail(participant *Participant, group *Group, assignments []*Assignment, items []*Item) error {
+	// Get items assigned to this participant
+	assignedItems := h.getAssignedItemsForParticipant(participant.ID, assignments, items)
+	
+	// Create detailed email content
+	subject := fmt.Sprintf("Your Assignment Results: %s", group.Name)
+	body := h.generateDetailedAssignmentEmail(participant, group, assignedItems)
+
+	// Log the email (in production, this would send actual emails)
+	log.Printf("=== PERSONALIZED EMAIL NOTIFICATION ===")
+	log.Printf("To: participant_%d", participant.ID)
+	log.Printf("Subject: %s", subject)
+	log.Printf("Body:\n%s", body)
+	log.Printf("=======================================")
+
+	return nil
+}
+
+// getAssignedItemsForParticipant returns items assigned to a specific participant with details
+func (h *AssignmentTaskHandler) getAssignedItemsForParticipant(participantID int, assignments []*Assignment, items []*Item) []*Item {
+	// Create a map of item IDs for quick lookup
+	itemMap := make(map[int]*Item)
+	for _, item := range items {
+		itemMap[item.ID] = item
+	}
+
+	var assignedItems []*Item
+	for _, assignment := range assignments {
+		if assignment.ParticipantID == participantID {
+			if item, exists := itemMap[assignment.ItemID]; exists {
+				assignedItems = append(assignedItems, item)
+			}
+		}
+	}
+	return assignedItems
+}
+
+// generateDetailedAssignmentEmail creates a detailed email with item information
+func (h *AssignmentTaskHandler) generateDetailedAssignmentEmail(participant *Participant, group *Group, assignedItems []*Item) string {
+	itemCount := len(assignedItems)
+	
+	body := fmt.Sprintf(`
+Hello!
+
+The assignment for group "%s" has been completed.
+
+You have been assigned %d item(s):
+
+`, group.Name, itemCount)
+
+	// Add detailed item information
+	for i, item := range assignedItems {
+		body += fmt.Sprintf("%d. %s", i+1, item.Name)
+		if item.Description != "" {
+			body += fmt.Sprintf(" - %s", item.Description)
+		}
+		body += "\n"
+	}
+
+	body += fmt.Sprintf(`
+To view the full results and details, please visit:
+%s/participant/%s
+
+Best regards,
+OptiAssign Team
+`, h.baseURL, participant.Token)
+
+	return body
 }

@@ -59,7 +59,7 @@ func main() {
 
 	// Initialize task manager
 	taskManager := domain.NewTaskManager(2) // 2 background workers
-	assignmentTaskHandler := domain.NewAssignmentTaskHandler(assignmentAlgorithm, emailService, groupRepo, participantRepo, "http://localhost:8080")
+	assignmentTaskHandler := domain.NewAssignmentTaskHandler(assignmentAlgorithm, emailService, groupRepo, participantRepo, itemRepo, "http://localhost:8080")
 	taskManager.RegisterHandler("assignment", assignmentTaskHandler)
 	taskManager.Start()
 
