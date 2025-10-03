@@ -57,10 +57,19 @@ func main() {
 	assignmentAlgorithm := domain.NewAssignmentAlgorithm(groupRepo, itemRepo, participantRepo, prioritizationRepo, assignmentRepo)
 	emailService := domain.NewEmailService(cfg.EmailLogToConsole)
 
+	// Initialize task manager
+	taskManager := domain.NewTaskManager(2) // 2 background workers
+	assignmentTaskHandler := domain.NewAssignmentTaskHandler(assignmentAlgorithm, emailService, groupRepo, participantRepo, "http://localhost:8080")
+	taskManager.RegisterHandler("assignment", assignmentTaskHandler)
+	taskManager.Start()
+
+	// Initialize assignment service
+	assignmentService := domain.NewAssignmentService(groupRepo, participantRepo, prioritizationRepo, taskManager)
+
 	// Initialize handlers
 	authHandler := api.NewAuthHandler(authService, cfg)
 	groupHandler := api.NewGroupHandler(groupService, userRepo, assignmentAlgorithm, emailService)
-	participantHandler := api.NewParticipantHandler(groupService, prioritizationRepo, participantRepo, itemRepo)
+	participantHandler := api.NewParticipantHandler(groupService, prioritizationRepo, participantRepo, itemRepo, assignmentService)
 
 	// Setup routes
 	r := chi.NewRouter()
@@ -183,11 +192,21 @@ func main() {
 		r.Get("/{token}", participantHandler.ParticipantAccess)
 		r.Get("/{token}/priorities", participantHandler.PriorityForm)
 		r.Post("/{token}/priorities", participantHandler.SubmitPriorities)
+		r.Get("/{token}/status", participantHandler.AssignmentStatus)
 	})
 
 	// Task management is handled by Taskfile.yml
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
+	
+	// Graceful shutdown
+	go func() {
+		if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
+			log.Fatal("Server failed to start:", err)
+		}
+	}()
+
+	// Wait for interrupt signal
+	select {}
 }

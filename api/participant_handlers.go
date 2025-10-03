@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,10 +14,11 @@ import (
 
 // ParticipantHandler handles participant-related HTTP requests
 type ParticipantHandler struct {
-	groupService     *domain.GroupService
-	prioritizationRepo domain.PrioritizationRepository
-	participantRepo domain.ParticipantRepository
-	itemRepo        domain.ItemRepository
+	groupService        *domain.GroupService
+	prioritizationRepo  domain.PrioritizationRepository
+	participantRepo     domain.ParticipantRepository
+	itemRepo            domain.ItemRepository
+	assignmentService   *domain.AssignmentService
 }
 
 // NewParticipantHandler creates a new participant handler
@@ -24,12 +27,14 @@ func NewParticipantHandler(
 	prioritizationRepo domain.PrioritizationRepository,
 	participantRepo domain.ParticipantRepository,
 	itemRepo domain.ItemRepository,
+	assignmentService *domain.AssignmentService,
 ) *ParticipantHandler {
 	return &ParticipantHandler{
-		groupService:      groupService,
-		prioritizationRepo: prioritizationRepo,
-		participantRepo:   participantRepo,
-		itemRepo:          itemRepo,
+		groupService:        groupService,
+		prioritizationRepo:  prioritizationRepo,
+		participantRepo:     participantRepo,
+		itemRepo:            itemRepo,
+		assignmentService:   assignmentService,
 	}
 }
 
@@ -229,6 +234,12 @@ func (h *ParticipantHandler) SubmitPriorities(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Check if all participants have submitted and trigger assignment if ready
+	if err := h.assignmentService.CheckAndTriggerAssignment(r.Context(), participant.GroupID); err != nil {
+		// Log error but don't fail the request - assignment will be retried
+		log.Printf("Failed to check/trigger assignment for group %d: %v", participant.GroupID, err)
+	}
+
 	// Return success response
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
@@ -243,6 +254,49 @@ func (h *ParticipantHandler) SubmitPriorities(w http.ResponseWriter, r *http.Req
 		</div>
 	`
 	w.Write([]byte(successHTML))
+}
+
+// AssignmentStatus returns the assignment status for a group
+func (h *ParticipantHandler) AssignmentStatus(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+	if token == "" {
+		http.Error(w, "Token required", http.StatusBadRequest)
+		return
+	}
+
+	// Get participant by token
+	participant, err := h.participantRepo.GetByToken(token)
+	if err != nil {
+		http.Error(w, "Failed to get participant", http.StatusInternalServerError)
+		return
+	}
+	if participant == nil {
+		http.Error(w, "Invalid token", http.StatusNotFound)
+		return
+	}
+
+	// Get assignment status
+	status, err := h.assignmentService.GetAssignmentStatus(r.Context(), participant.GroupID)
+	if err != nil {
+		http.Error(w, "Failed to get assignment status", http.StatusInternalServerError)
+		return
+	}
+
+	// Return JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	
+	// Simple JSON response (in a real app, use json.Marshal)
+	jsonResponse := fmt.Sprintf(`{
+		"group_id": %d,
+		"group_status": "%s",
+		"total_participants": %d,
+		"submitted_count": %d,
+		"all_submitted": %t,
+		"is_completed": %t
+	}`, status.GroupID, status.GroupStatus, status.TotalParticipants, status.SubmittedCount, status.AllSubmitted, status.IsCompleted)
+	
+	w.Write([]byte(jsonResponse))
 }
 
 // renderPriorityError renders a priority form error response

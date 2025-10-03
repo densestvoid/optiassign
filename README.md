@@ -25,11 +25,14 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ HTMX forms with server-side validation
 - ✅ Complete repository layer
 - ✅ Business logic services
-- ✅ **NEW**: Tokenized participant access
-- ✅ **NEW**: Priority list submission forms
-- ✅ **NEW**: Snaking draft assignment algorithm
-- ✅ **NEW**: Email invitation system
-- ✅ **NEW**: Assignment execution and results
+- ✅ Tokenized participant access
+- ✅ Priority list submission forms
+- ✅ Snaking draft assignment algorithm
+- ✅ Email invitation system
+- ✅ Assignment execution and results
+- ✅ **NEW**: Automatic assignment execution when last participant submits
+- ✅ **NEW**: Background task manager for assignment processing
+- ✅ **NEW**: Real-time assignment status tracking
 
 ## Setup
 
@@ -171,6 +174,7 @@ go tool task clean-docker     # Clean Docker resources
 - `GET /participant/{token}` - Participant access page
 - `GET /participant/{token}/priorities` - Priority submission form
 - `POST /participant/{token}/priorities` - Submit priorities
+- `GET /participant/{token}/status` - Assignment status (JSON)
 
 ## Next Steps (Phase 4)
 
