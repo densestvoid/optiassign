@@ -113,34 +113,38 @@ INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User
 - CLI tools for migration management
 - Rollback and status checking capabilities
 
-### Task Commands (using Go module dependencies)
+### Task Commands (using modern Go tools pattern)
 ```bash
+# First, install tools
+go install github.com/go-task/task/v3/cmd/task@latest
+go install github.com/pressly/goose/v3/cmd/goose@latest
+
 # Development
-go run github.com/go-task/task/v3/cmd/task dev              # Start development server
-go run github.com/go-task/task/v3/cmd/task build            # Build application
-go run github.com/go-task/task/v3/cmd/task test             # Run tests
-go run github.com/go-task/task/v3/cmd/task test-coverage    # Run tests with coverage
-go run github.com/go-task/task/v3/cmd/task lint             # Run linter
+go tool task dev              # Start development server
+go tool task build            # Build application
+go tool task test             # Run tests
+go tool task test-coverage    # Run tests with coverage
+go tool task lint             # Run linter
 
 # Database
-go run github.com/pressly/goose/v3/cmd/goose -dir migrations up     # Run migrations
-go run github.com/pressly/goose/v3/cmd/goose -dir migrations down   # Rollback migrations
-go run github.com/pressly/goose/v3/cmd/goose -dir migrations status # Check migration status
+go tool goose -dir migrations up     # Run migrations
+go tool goose -dir migrations down   # Rollback migrations
+go tool goose -dir migrations status # Check migration status
 
 # Docker
-go run github.com/go-task/task/v3/cmd/task docker-build     # Build Docker image
-go run github.com/go-task/task/v3/cmd/task docker-run       # Run in Docker
-go run github.com/go-task/task/v3/cmd/task docker-compose-up # Start services
-go run github.com/go-task/task/v3/cmd/task docker-compose-down # Stop services
+go tool task docker-build     # Build Docker image
+go tool task docker-run       # Run in Docker
+go tool task docker-compose-up # Start services
+go tool task docker-compose-down # Stop services
 
 # Setup
-go run github.com/go-task/task/v3/cmd/task setup            # Initial setup
-go run github.com/go-task/task/v3/cmd/task dev-setup        # Complete development setup
-go run github.com/go-task/task/v3/cmd/task install-deps    # Install dependencies
+go tool task setup            # Initial setup
+go tool task dev-setup        # Complete development setup
+go tool task install-deps    # Install dependencies
 
 # Cleanup
-go run github.com/go-task/task/v3/cmd/task clean            # Clean build artifacts
-go run github.com/go-task/task/v3/cmd/task clean-docker     # Clean Docker resources
+go tool task clean            # Clean build artifacts
+go tool task clean-docker     # Clean Docker resources
 ```
 
 ## Next Steps (Phase 2)

@@ -11,8 +11,10 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
-# Tools are managed as dependencies in go.mod
-echo "Tools are managed as Go module dependencies"
+# Install Go tools
+echo "Installing Go tools..."
+go install github.com/go-task/task/v3/cmd/task@latest
+go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Check if .env file exists
 if [ ! -f .env ]; then
@@ -33,18 +35,18 @@ fi
 
 # Use Task for setup
 echo "Running development setup with Task..."
-go run github.com/go-task/task/v3/cmd/task dev-setup
+go tool task dev-setup
 
 echo "✅ Setup complete!"
 echo "🌐 Access the application at: http://localhost:8080"
 echo ""
 echo "🔧 Common Task commands:"
-echo "   task dev              # Start development server"
-echo "   task docker-compose-up # Start services"
-echo "   task db-migrate       # Run migrations"
-echo "   task db-status        # Check migration status"
-echo "   task test             # Run tests"
-echo "   task build            # Build application"
+echo "   go tool task dev              # Start development server"
+echo "   go tool task docker-compose-up # Start services"
+echo "   go tool task db-migrate       # Run migrations"
+echo "   go tool task db-status        # Check migration status"
+echo "   go tool task test             # Run tests"
+echo "   go tool task build            # Build application"
 echo ""
 echo "📝 To add pre-registered users, connect to the database and run:"
 echo "   INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User Name');"

@@ -11,11 +11,15 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
+# Install tools first
+echo "Installing Go tools..."
+go install github.com/go-task/task/v3/cmd/task@latest
+
 # Test Go build
 echo "1. Testing Go build..."
-if go run github.com/go-task/task/v3/cmd/task build; then
+if go tool task build; then
     echo "✅ Go build successful"
-    go run github.com/go-task/task/v3/cmd/task clean
+    go tool task clean
 else
     echo "❌ Go build failed"
     exit 1
@@ -23,7 +27,7 @@ fi
 
 # Test Go tests
 echo "2. Running Go tests..."
-if go run github.com/go-task/task/v3/cmd/task test; then
+if go tool task test; then
     echo "✅ Go tests passed"
 else
     echo "❌ Go tests failed"
@@ -32,7 +36,7 @@ fi
 
 # Test Docker build
 echo "3. Testing Docker build..."
-if go run github.com/go-task/task/v3/cmd/task docker-build; then
+if go tool task docker-build; then
     echo "✅ Docker build successful"
     docker rmi optiassign:latest
 else
@@ -43,7 +47,7 @@ fi
 echo "🎉 All tests passed! OptiAssign is ready for development."
 echo ""
 echo "🔧 Available Task commands:"
-echo "   go run github.com/go-task/task/v3/cmd/task --list  # Show all available tasks"
-echo "   go run github.com/go-task/task/v3/cmd/task dev     # Start development server"
-echo "   go run github.com/go-task/task/v3/cmd/task test-coverage  # Run tests with coverage"
-echo "   go run github.com/go-task/task/v3/cmd/task lint    # Run linter"
+echo "   go tool task --list  # Show all available tasks"
+echo "   go tool task dev     # Start development server"
+echo "   go tool task test-coverage  # Run tests with coverage"
+echo "   go tool task lint    # Run linter"
