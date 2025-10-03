@@ -70,6 +70,7 @@ func main() {
 	authHandler := api.NewAuthHandler(authService, cfg)
 	groupHandler := api.NewGroupHandler(groupService, userRepo, assignmentAlgorithm, emailService)
 	participantHandler := api.NewParticipantHandler(groupService, prioritizationRepo, participantRepo, itemRepo, assignmentService)
+	assignmentHandler := api.NewAssignmentHandler(groupService, assignmentRepo, participantRepo, itemRepo, assignmentService)
 
 	// Setup routes
 	r := chi.NewRouter()
@@ -185,6 +186,7 @@ func main() {
 		r.Post("/", groupHandler.CreateGroup)
 		r.Get("/{id}", groupHandler.ViewGroup)
 		r.Post("/{id}/execute", groupHandler.ExecuteAssignment)
+		r.Get("/{id}/results", assignmentHandler.ViewResults)
 	})
 
 	// Participant routes (no auth required - uses tokens)
@@ -193,6 +195,7 @@ func main() {
 		r.Get("/{token}/priorities", participantHandler.PriorityForm)
 		r.Post("/{token}/priorities", participantHandler.SubmitPriorities)
 		r.Get("/{token}/status", participantHandler.AssignmentStatus)
+		r.Get("/{token}/results", assignmentHandler.ParticipantResults)
 	})
 
 	// Task management is handled by Taskfile.yml

@@ -2,9 +2,9 @@
 
 A web application for group-based, randomized, prioritized, snaking-draft item assignment.
 
-## ✅ Phase 3 Complete: Prioritization & Core Logic
+## ✅ Phase 4 Complete: Finalization
 
-**Current Status**: Phase 3 implementation is complete with tokenized participant access, priority submission, assignment algorithm, and email notifications.
+**Current Status**: Phase 4 implementation is complete with assignment results display, production Docker deployment, and Terraform infrastructure.
 
 ### Features Implemented
 
@@ -33,9 +33,13 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ Automatic assignment execution when last participant submits
 - ✅ Background task manager for assignment processing
 - ✅ Real-time assignment status tracking
-- ✅ **NEW**: Personalized email notifications with assigned items
-- ✅ **NEW**: Detailed item information in assignment emails
-- ✅ **NEW**: Enhanced email templates with item descriptions
+- ✅ Personalized email notifications with assigned items
+- ✅ Detailed item information in assignment emails
+- ✅ Enhanced email templates with item descriptions
+- ✅ **NEW**: Assignment results display pages
+- ✅ **NEW**: Production-ready Docker deployment
+- ✅ **NEW**: Complete Terraform infrastructure
+- ✅ **NEW**: Automated deployment scripts
 
 ## Setup
 
@@ -178,11 +182,44 @@ go tool task clean-docker     # Clean Docker resources
 - `GET /participant/{token}/priorities` - Priority submission form
 - `POST /participant/{token}/priorities` - Submit priorities
 - `GET /participant/{token}/status` - Assignment status (JSON)
+- `GET /participant/{token}/results` - Participant assignment results
 
-## Next Steps (Phase 4)
+### Assignment Results
+- `GET /groups/{id}/results` - Full assignment results (owner only)
+- `GET /participant/{token}/results` - Participant's assigned items
 
-The final phase will implement:
-- Assignment results display
-- Email notification system
-- Docker deployment
-- Terraform infrastructure
+## Production Deployment
+
+### Quick Start
+```bash
+# Deploy to AWS with Terraform
+./deployments/deploy.sh
+```
+
+### Manual Deployment
+```bash
+# Build Docker image
+docker build -t optiassign:latest .
+
+# Run with docker-compose
+docker-compose up -d
+
+# Apply database migrations
+go tool task db-migrate
+```
+
+### Infrastructure
+- **AWS ECS Fargate** for containerized application
+- **Application Load Balancer** for traffic distribution
+- **RDS PostgreSQL** for database
+- **CloudWatch** for logging and monitoring
+- **VPC** with public/private subnets for security
+
+## Project Complete! 🎉
+
+**OptiAssign MVS** is now a fully functional, production-ready application with:
+- Complete assignment workflow
+- Automatic execution
+- Personalized notifications
+- Production infrastructure
+- Scalable deployment
