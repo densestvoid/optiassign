@@ -6,6 +6,8 @@ require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/pressly/goose/v3 v3.15.1
+	github.com/sethvargo/go-envconfig v0.9.0
 	golang.org/x/oauth2 v0.12.0
 )
 
