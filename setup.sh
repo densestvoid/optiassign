@@ -11,10 +11,8 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
-# Install tools if needed
-echo "Installing Go tools..."
-go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/pressly/goose/v3/cmd/goose@latest
+# Tools are managed as dependencies in go.mod
+echo "Tools are managed as Go module dependencies"
 
 # Check if .env file exists
 if [ ! -f .env ]; then
@@ -35,7 +33,7 @@ fi
 
 # Use Task for setup
 echo "Running development setup with Task..."
-go run github.com/go-task/task/v3/cmd/task@latest dev-setup
+go run github.com/go-task/task/v3/cmd/task dev-setup
 
 echo "✅ Setup complete!"
 echo "🌐 Access the application at: http://localhost:8080"

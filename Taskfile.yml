@@ -15,9 +15,9 @@ tasks:
       PORT: "{{.PORT}}"
 
   task:
-    desc: "Run Task (go-tasks) - requires Task to be installed"
+    desc: "Run Task (go-tasks) using module dependency"
     cmds:
-      - go run github.com/go-task/task/v3/cmd/task@latest {{.CLI_ARGS}}
+      - go run github.com/go-task/task/v3/cmd/task {{.CLI_ARGS}}
     vars:
       CLI_ARGS: ""
 
@@ -49,23 +49,23 @@ tasks:
   db-migrate:
     desc: "Run database migrations"
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations up
+      - go run github.com/pressly/goose/v3/cmd/goose -dir migrations up
 
   db-rollback:
     desc: "Rollback database migrations"
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations down
+      - go run github.com/pressly/goose/v3/cmd/goose -dir migrations down
 
   db-status:
     desc: "Check migration status"
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations status
+      - go run github.com/pressly/goose/v3/cmd/goose -dir migrations status
 
   db-reset:
     desc: "Reset database (rollback all migrations)"
     cmds:
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations down
-      - go run github.com/pressly/goose/v3/cmd/goose@latest -dir migrations up
+      - go run github.com/pressly/goose/v3/cmd/goose -dir migrations down
+      - go run github.com/pressly/goose/v3/cmd/goose -dir migrations up
 
   # Docker tasks
   docker-build:
@@ -109,10 +109,11 @@ tasks:
       - go mod tidy
 
   install-tools:
-    desc: "Install Go tools (Task, Goose)"
+    desc: "Install Go tools (Task, Goose) - tools are managed via go.mod"
     cmds:
-      - go install github.com/go-task/task/v3/cmd/task@latest
-      - go install github.com/pressly/goose/v3/cmd/goose@latest
+      - echo "Tools are managed as dependencies in go.mod"
+      - echo "Use 'go run github.com/go-task/task/v3/cmd/task' to run Task"
+      - echo "Use 'go run github.com/pressly/goose/v3/cmd/goose' to run Goose"
 
   # Cleanup tasks
   clean:

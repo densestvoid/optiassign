@@ -24,9 +24,9 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 
 ### Prerequisites
 
+- Go 1.21 or later
 - Docker and Docker Compose
 - Google OAuth credentials
-- Task (go-tasks) - [Installation Guide](https://taskfile.dev/installation/)
 
 ### Quick Start
 
@@ -113,35 +113,34 @@ INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User
 - CLI tools for migration management
 - Rollback and status checking capabilities
 
-### Task Commands
+### Task Commands (using Go module dependencies)
 ```bash
 # Development
-task dev              # Start development server
-task build            # Build application
-task test             # Run tests
-task test-coverage    # Run tests with coverage
-task lint             # Run linter
+go run github.com/go-task/task/v3/cmd/task dev              # Start development server
+go run github.com/go-task/task/v3/cmd/task build            # Build application
+go run github.com/go-task/task/v3/cmd/task test             # Run tests
+go run github.com/go-task/task/v3/cmd/task test-coverage    # Run tests with coverage
+go run github.com/go-task/task/v3/cmd/task lint             # Run linter
 
 # Database
-task db-migrate       # Run migrations
-task db-rollback      # Rollback migrations
-task db-status        # Check migration status
-task db-reset         # Reset database
+go run github.com/pressly/goose/v3/cmd/goose -dir migrations up     # Run migrations
+go run github.com/pressly/goose/v3/cmd/goose -dir migrations down   # Rollback migrations
+go run github.com/pressly/goose/v3/cmd/goose -dir migrations status # Check migration status
 
 # Docker
-task docker-build     # Build Docker image
-task docker-run       # Run in Docker
-task docker-compose-up # Start services
-task docker-compose-down # Stop services
+go run github.com/go-task/task/v3/cmd/task docker-build     # Build Docker image
+go run github.com/go-task/task/v3/cmd/task docker-run       # Run in Docker
+go run github.com/go-task/task/v3/cmd/task docker-compose-up # Start services
+go run github.com/go-task/task/v3/cmd/task docker-compose-down # Stop services
 
 # Setup
-task setup            # Initial setup
-task dev-setup        # Complete development setup
-task install-deps     # Install dependencies
+go run github.com/go-task/task/v3/cmd/task setup            # Initial setup
+go run github.com/go-task/task/v3/cmd/task dev-setup        # Complete development setup
+go run github.com/go-task/task/v3/cmd/task install-deps    # Install dependencies
 
 # Cleanup
-task clean            # Clean build artifacts
-task clean-docker     # Clean Docker resources
+go run github.com/go-task/task/v3/cmd/task clean            # Clean build artifacts
+go run github.com/go-task/task/v3/cmd/task clean-docker     # Clean Docker resources
 ```
 
 ## Next Steps (Phase 2)

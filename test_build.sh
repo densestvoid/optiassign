@@ -4,18 +4,18 @@
 
 echo "Testing OptiAssign build..."
 
-# Check if Task is installed
-if ! command -v task &> /dev/null; then
-    echo "❌ Task is not installed. Please install it first:"
-    echo "   https://taskfile.dev/installation/"
+# Check if Go is available
+if ! command -v go &> /dev/null; then
+    echo "❌ Go is not installed. Please install Go first:"
+    echo "   https://golang.org/dl/"
     exit 1
 fi
 
 # Test Go build
 echo "1. Testing Go build..."
-if task build; then
+if go run github.com/go-task/task/v3/cmd/task build; then
     echo "✅ Go build successful"
-    task clean
+    go run github.com/go-task/task/v3/cmd/task clean
 else
     echo "❌ Go build failed"
     exit 1
@@ -23,7 +23,7 @@ fi
 
 # Test Go tests
 echo "2. Running Go tests..."
-if task test; then
+if go run github.com/go-task/task/v3/cmd/task test; then
     echo "✅ Go tests passed"
 else
     echo "❌ Go tests failed"
@@ -32,7 +32,7 @@ fi
 
 # Test Docker build
 echo "3. Testing Docker build..."
-if task docker-build; then
+if go run github.com/go-task/task/v3/cmd/task docker-build; then
     echo "✅ Docker build successful"
     docker rmi optiassign:latest
 else
@@ -43,7 +43,7 @@ fi
 echo "🎉 All tests passed! OptiAssign is ready for development."
 echo ""
 echo "🔧 Available Task commands:"
-echo "   task --list              # Show all available tasks"
-echo "   task dev                 # Start development server"
-echo "   task test-coverage       # Run tests with coverage"
-echo "   task lint                # Run linter"
+echo "   go run github.com/go-task/task/v3/cmd/task --list  # Show all available tasks"
+echo "   go run github.com/go-task/task/v3/cmd/task dev     # Start development server"
+echo "   go run github.com/go-task/task/v3/cmd/task test-coverage  # Run tests with coverage"
+echo "   go run github.com/go-task/task/v3/cmd/task lint    # Run linter"
