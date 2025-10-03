@@ -2,9 +2,9 @@
 
 A web application for group-based, randomized, prioritized, snaking-draft item assignment.
 
-## ✅ Phase 1 Complete: Setup & Auth (Enhanced)
+## ✅ Phase 2 Complete: Group/Item CRUD
 
-**Current Status**: Phase 1 implementation is complete with modern Go tooling, task management, and improved migration system.
+**Current Status**: Phase 2 implementation is complete with HTMX forms, server-side validation, and full group management functionality.
 
 ### Features Implemented
 
@@ -15,10 +15,16 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ Docker containerization
 - ✅ Unit tests for core authentication logic
 - ✅ Secure session management
-- ✅ **NEW**: Modern configuration management
-- ✅ **NEW**: Task management system for repository operations
-- ✅ **NEW**: Goose migration management with CLI tools
-- ✅ **NEW**: Enhanced database connection pooling
+- ✅ Modern configuration management
+- ✅ Task management system for repository operations
+- ✅ Goose migration management with CLI tools
+- ✅ Enhanced database connection pooling
+- ✅ **NEW**: Group creation and management
+- ✅ **NEW**: Item CRUD operations
+- ✅ **NEW**: Participant management
+- ✅ **NEW**: HTMX forms with server-side validation
+- ✅ **NEW**: Complete repository layer
+- ✅ **NEW**: Business logic services
 
 ## Setup
 
@@ -147,10 +153,18 @@ go tool task clean            # Clean build artifacts
 go tool task clean-docker     # Clean Docker resources
 ```
 
-## Next Steps (Phase 2)
+## API Endpoints (Phase 2)
+
+- `GET /groups` - List user's groups
+- `GET /groups/new` - Create group form
+- `POST /groups` - Create new group (HTMX)
+- `GET /groups/{id}` - View group details
+- `GET /groups/{id}/add-participant` - Add participant form (HTMX)
+
+## Next Steps (Phase 3)
 
 The next phase will implement:
-- Group creation and management
-- Item CRUD operations
-- Participant management
-- HTMX forms with server-side validation
+- Tokenized link access for participants
+- Priority list submission forms
+- Assignment algorithm implementation
+- Email invitation system

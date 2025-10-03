@@ -45,14 +45,17 @@ func main() {
 
 	// Initialize repositories
 	userRepo := db.NewUserRepository()
-
-	// Task management is handled by Taskfile.yml
+	groupRepo := db.NewGroupRepository()
+	itemRepo := db.NewItemRepository()
+	participantRepo := db.NewParticipantRepository()
 
 	// Initialize services
 	authService := domain.NewAuthService(userRepo)
+	groupService := domain.NewGroupService(groupRepo, itemRepo, participantRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := api.NewAuthHandler(authService, cfg)
+	groupHandler := api.NewGroupHandler(groupService, userRepo)
 
 	// Setup routes
 	r := chi.NewRouter()
@@ -158,6 +161,15 @@ func main() {
 			}
 			web.RenderTemplate(w, "base.html", data)
 		})
+	})
+
+	// Group routes
+	r.Route("/groups", func(r chi.Router) {
+		r.Use(api.AuthMiddleware)
+		r.Get("/", groupHandler.ListGroups)
+		r.Get("/new", groupHandler.NewGroupForm)
+		r.Post("/", groupHandler.CreateGroup)
+		r.Get("/{id}", groupHandler.ViewGroup)
 	})
 
 	// Task management is handled by Taskfile.yml
