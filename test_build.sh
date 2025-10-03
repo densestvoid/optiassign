@@ -13,7 +13,7 @@ fi
 
 # Install tools first
 echo "Installing Go tools..."
-go install github.com/go-task/task/v3/cmd/task@latest
+go get -tool github.com/go-task/task/v3/cmd/task@latest
 
 # Test Go build
 echo "1. Testing Go build..."

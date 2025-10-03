@@ -13,8 +13,8 @@ fi
 
 # Install Go tools
 echo "Installing Go tools..."
-go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/pressly/goose/v3/cmd/goose@latest
+go get -tool github.com/go-task/task/v3/cmd/task@latest
+go get -tool github.com/pressly/goose/v3/cmd/goose@latest
 
 # Check if .env file exists
 if [ ! -f .env ]; then

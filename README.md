@@ -116,8 +116,8 @@ INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User
 ### Task Commands (using modern Go tools pattern)
 ```bash
 # First, install tools
-go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/pressly/goose/v3/cmd/goose@latest
+go get -tool github.com/go-task/task/v3/cmd/task@latest
+go get -tool github.com/pressly/goose/v3/cmd/goose@latest
 
 # Development
 go tool task dev              # Start development server
