@@ -26,6 +26,7 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 
 - Docker and Docker Compose
 - Google OAuth credentials
+- Task (go-tasks) - [Installation Guide](https://taskfile.dev/installation/)
 
 ### Quick Start
 
@@ -103,21 +104,44 @@ INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User
 - Type-safe configuration loading
 
 ### Task Management
-- Repository task management system
-- Background task execution framework
-- Task validation and error handling
+- Taskfile.yml for common repository commands
+- go-tasks (Task) for development workflow
+- Standardized build, test, and deployment tasks
 
 ### Migration Management
 - Goose-based migration system
 - CLI tools for migration management
 - Rollback and status checking capabilities
 
-### CLI Tools
+### Task Commands
 ```bash
-# Migration management
-go run cmd/migrate/main.go -command=up     # Run migrations
-go run cmd/migrate/main.go -command=down   # Rollback migrations  
-go run cmd/migrate/main.go -command=status # Check migration status
+# Development
+task dev              # Start development server
+task build            # Build application
+task test             # Run tests
+task test-coverage    # Run tests with coverage
+task lint             # Run linter
+
+# Database
+task db-migrate       # Run migrations
+task db-rollback      # Rollback migrations
+task db-status        # Check migration status
+task db-reset         # Reset database
+
+# Docker
+task docker-build     # Build Docker image
+task docker-run       # Run in Docker
+task docker-compose-up # Start services
+task docker-compose-down # Stop services
+
+# Setup
+task setup            # Initial setup
+task dev-setup        # Complete development setup
+task install-deps     # Install dependencies
+
+# Cleanup
+task clean            # Clean build artifacts
+task clean-docker     # Clean Docker resources
 ```
 
 ## Next Steps (Phase 2)

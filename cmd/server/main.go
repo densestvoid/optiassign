@@ -12,7 +12,6 @@ import (
 	"optiassign/config"
 	"optiassign/db"
 	"optiassign/domain"
-	"optiassign/tasks"
 	"optiassign/web"
 )
 
@@ -47,9 +46,7 @@ func main() {
 	// Initialize repositories
 	userRepo := db.NewUserRepository()
 
-	// Initialize task manager
-	taskManager := tasks.NewTaskManager(db.GetDB(), cfg)
-	_ = tasks.NewRepositoryTaskManager(userRepo, nil, nil, nil, nil)
+	// Task management is handled by Taskfile.yml
 
 	// Initialize services
 	authService := domain.NewAuthService(userRepo)
@@ -163,22 +160,7 @@ func main() {
 		})
 	})
 
-	// Task management routes (for development/testing)
-	r.Route("/tasks", func(r chi.Router) {
-		r.Use(api.AuthMiddleware)
-		r.Post("/test", func(w http.ResponseWriter, r *http.Request) {
-			// Test task execution
-			err := taskManager.ExecuteTask(r.Context(), "test-task", map[string]interface{}{
-				"message": "Hello from task manager",
-			})
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Task executed successfully"))
-		})
-	})
+	// Task management is handled by Taskfile.yml
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Port)
