@@ -172,6 +172,16 @@ func (s *GroupService) GetUserGroups(ctx context.Context, userID int) ([]*Group,
 	return s.groupRepo.GetByOwner(userID)
 }
 
+// GetGroupByID gets a group by ID
+func (s *GroupService) GetGroupByID(ctx context.Context, groupID int) (*Group, error) {
+	return s.groupRepo.GetByID(groupID)
+}
+
+// GetGroupParticipants gets all participants for a group
+func (s *GroupService) GetGroupParticipants(ctx context.Context, groupID int) ([]*Participant, error) {
+	return s.participantRepo.GetByGroupID(groupID)
+}
+
 // DeleteGroup deletes a group and all its associated data
 func (s *GroupService) DeleteGroup(ctx context.Context, groupID int) error {
 	// Delete items

@@ -13,15 +13,19 @@ import (
 
 // GroupHandler handles group-related HTTP requests
 type GroupHandler struct {
-	groupService *domain.GroupService
-	userRepo     domain.UserRepository
+	groupService      *domain.GroupService
+	userRepo          domain.UserRepository
+	assignmentAlgorithm *domain.AssignmentAlgorithm
+	emailService      *domain.EmailService
 }
 
 // NewGroupHandler creates a new group handler
-func NewGroupHandler(groupService *domain.GroupService, userRepo domain.UserRepository) *GroupHandler {
+func NewGroupHandler(groupService *domain.GroupService, userRepo domain.UserRepository, assignmentAlgorithm *domain.AssignmentAlgorithm, emailService *domain.EmailService) *GroupHandler {
 	return &GroupHandler{
-		groupService: groupService,
-		userRepo:     userRepo,
+		groupService:        groupService,
+		userRepo:            userRepo,
+		assignmentAlgorithm: assignmentAlgorithm,
+		emailService:        emailService,
 	}
 }
 
@@ -215,6 +219,64 @@ func (h *GroupHandler) ViewGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	web.RenderTemplate(w, "base.html", data)
+}
+
+// ExecuteAssignment runs the assignment algorithm
+func (h *GroupHandler) ExecuteAssignment(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if session == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groupIDStr := chi.URLParam(r, "id")
+	groupID, err := strconv.Atoi(groupIDStr)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get group to verify ownership
+	group, err := h.groupService.GetGroupByID(r.Context(), groupID)
+	if err != nil {
+		http.Error(w, "Failed to get group: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if group.OwnerUserID != session.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	// Execute assignment
+	result, err := h.assignmentAlgorithm.ExecuteAssignment(r.Context(), groupID)
+	if err != nil {
+		h.renderFormError(w, "Failed to execute assignment: "+err.Error())
+		return
+	}
+
+	// Send email notifications to participants
+	participants, err := h.groupService.GetGroupParticipants(r.Context(), groupID)
+	if err == nil {
+		baseURL := "http://localhost:8080" // In production, this should come from config
+		for _, participant := range participants {
+			h.emailService.SendAssignmentNotification(participant, group, result.Assignments, baseURL)
+		}
+	}
+
+	// Return success response
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	
+	successHTML := `
+		<div class="alert alert-success" role="alert">
+			<h4 class="alert-heading">Assignment Complete!</h4>
+			<p>The assignment has been executed successfully. All participants have been notified.</p>
+			<div class="mt-3">
+				<a href="/groups/` + strconv.Itoa(groupID) + `" class="btn btn-primary">View Results</a>
+			</div>
+		</div>
+	`
+	w.Write([]byte(successHTML))
 }
 
 // renderFormError renders a form error response

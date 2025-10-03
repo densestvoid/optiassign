@@ -48,14 +48,19 @@ func main() {
 	groupRepo := db.NewGroupRepository()
 	itemRepo := db.NewItemRepository()
 	participantRepo := db.NewParticipantRepository()
+	prioritizationRepo := db.NewPrioritizationRepository()
+	assignmentRepo := db.NewAssignmentRepository()
 
 	// Initialize services
 	authService := domain.NewAuthService(userRepo)
 	groupService := domain.NewGroupService(groupRepo, itemRepo, participantRepo, userRepo)
+	assignmentAlgorithm := domain.NewAssignmentAlgorithm(groupRepo, itemRepo, participantRepo, prioritizationRepo, assignmentRepo)
+	emailService := domain.NewEmailService(cfg.EmailLogToConsole)
 
 	// Initialize handlers
 	authHandler := api.NewAuthHandler(authService, cfg)
-	groupHandler := api.NewGroupHandler(groupService, userRepo)
+	groupHandler := api.NewGroupHandler(groupService, userRepo, assignmentAlgorithm, emailService)
+	participantHandler := api.NewParticipantHandler(groupService, prioritizationRepo, participantRepo, itemRepo)
 
 	// Setup routes
 	r := chi.NewRouter()
@@ -170,6 +175,14 @@ func main() {
 		r.Get("/new", groupHandler.NewGroupForm)
 		r.Post("/", groupHandler.CreateGroup)
 		r.Get("/{id}", groupHandler.ViewGroup)
+		r.Post("/{id}/execute", groupHandler.ExecuteAssignment)
+	})
+
+	// Participant routes (no auth required - uses tokens)
+	r.Route("/participant", func(r chi.Router) {
+		r.Get("/{token}", participantHandler.ParticipantAccess)
+		r.Get("/{token}/priorities", participantHandler.PriorityForm)
+		r.Post("/{token}/priorities", participantHandler.SubmitPriorities)
 	})
 
 	// Task management is handled by Taskfile.yml

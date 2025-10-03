@@ -2,9 +2,9 @@
 
 A web application for group-based, randomized, prioritized, snaking-draft item assignment.
 
-## ✅ Phase 2 Complete: Group/Item CRUD
+## ✅ Phase 3 Complete: Prioritization & Core Logic
 
-**Current Status**: Phase 2 implementation is complete with HTMX forms, server-side validation, and full group management functionality.
+**Current Status**: Phase 3 implementation is complete with tokenized participant access, priority submission, assignment algorithm, and email notifications.
 
 ### Features Implemented
 
@@ -19,12 +19,17 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ Task management system for repository operations
 - ✅ Goose migration management with CLI tools
 - ✅ Enhanced database connection pooling
-- ✅ **NEW**: Group creation and management
-- ✅ **NEW**: Item CRUD operations
-- ✅ **NEW**: Participant management
-- ✅ **NEW**: HTMX forms with server-side validation
-- ✅ **NEW**: Complete repository layer
-- ✅ **NEW**: Business logic services
+- ✅ Group creation and management
+- ✅ Item CRUD operations
+- ✅ Participant management
+- ✅ HTMX forms with server-side validation
+- ✅ Complete repository layer
+- ✅ Business logic services
+- ✅ **NEW**: Tokenized participant access
+- ✅ **NEW**: Priority list submission forms
+- ✅ **NEW**: Snaking draft assignment algorithm
+- ✅ **NEW**: Email invitation system
+- ✅ **NEW**: Assignment execution and results
 
 ## Setup
 
@@ -153,18 +158,24 @@ go tool task clean            # Clean build artifacts
 go tool task clean-docker     # Clean Docker resources
 ```
 
-## API Endpoints (Phase 2)
+## API Endpoints (Phase 3)
 
+### Group Management
 - `GET /groups` - List user's groups
 - `GET /groups/new` - Create group form
 - `POST /groups` - Create new group (HTMX)
 - `GET /groups/{id}` - View group details
-- `GET /groups/{id}/add-participant` - Add participant form (HTMX)
+- `POST /groups/{id}/execute` - Execute assignment algorithm
 
-## Next Steps (Phase 3)
+### Participant Access (Token-based)
+- `GET /participant/{token}` - Participant access page
+- `GET /participant/{token}/priorities` - Priority submission form
+- `POST /participant/{token}/priorities` - Submit priorities
 
-The next phase will implement:
-- Tokenized link access for participants
-- Priority list submission forms
-- Assignment algorithm implementation
-- Email invitation system
+## Next Steps (Phase 4)
+
+The final phase will implement:
+- Assignment results display
+- Email notification system
+- Docker deployment
+- Terraform infrastructure
