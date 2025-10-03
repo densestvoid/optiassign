@@ -9,7 +9,6 @@ import (
 
 	"optiassign/config"
 	"optiassign/domain"
-	"optiassign/db"
 )
 
 // TaskManager manages background tasks and repository operations

@@ -27,9 +27,9 @@ docker-compose up -d
 echo "Waiting for database to be ready..."
 sleep 10
 
-# Run database migrations
-echo "Running database migrations..."
-docker-compose exec -T app psql $DATABASE_URL -f migrations/001_initial_schema.sql
+# Run database migrations using Goose
+echo "Running database migrations with Goose..."
+docker-compose exec app go run cmd/migrate/main.go -command=up
 
 echo "✅ Setup complete!"
 echo "🌐 Access the application at: http://localhost:8080"
@@ -37,3 +37,8 @@ echo "🛑 To stop the application, run: docker-compose down"
 echo ""
 echo "📝 To add pre-registered users, connect to the database and run:"
 echo "   INSERT INTO users (google_id, email, name) VALUES ('', 'user@example.com', 'User Name');"
+echo ""
+echo "🔧 Migration commands:"
+echo "   go run cmd/migrate/main.go -command=up     # Run migrations"
+echo "   go run cmd/migrate/main.go -command=down   # Rollback migrations"
+echo "   go run cmd/migrate/main.go -command=status # Check migration status"

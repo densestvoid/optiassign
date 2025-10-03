@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"optiassign/config"
 	"optiassign/domain"
 )
 
@@ -20,11 +20,11 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler creates a new authentication handler
-func NewAuthHandler(authService *domain.AuthService) *AuthHandler {
+func NewAuthHandler(authService *domain.AuthService, cfg *config.Config) *AuthHandler {
 	config := &oauth2.Config{
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
+		ClientID:     cfg.GoogleClientID,
+		ClientSecret: cfg.GoogleClientSecret,
+		RedirectURL:  cfg.GoogleRedirectURL,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",

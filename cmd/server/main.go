@@ -4,14 +4,15 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"optiassign/api"
+	"optiassign/config"
 	"optiassign/db"
 	"optiassign/domain"
+	"optiassign/tasks"
 	"optiassign/web"
 )
 
@@ -21,25 +22,40 @@ func main() {
 		log.Println("No .env file found, using system environment variables")
 	}
 
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal("Failed to load configuration:", err)
+	}
+
 	// Initialize templates
 	if err := web.InitTemplates(); err != nil {
 		log.Fatal("Failed to initialize templates:", err)
 	}
 
 	// Connect to database
-	if err := db.Connect(); err != nil {
+	if err := db.Connect(cfg); err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
 
+	// Run migrations
+	if err := db.Migrate(db.GetDB(), "migrations"); err != nil {
+		log.Fatal("Failed to run migrations:", err)
+	}
+
 	// Initialize repositories
 	userRepo := db.NewUserRepository()
+
+	// Initialize task manager
+	taskManager := tasks.NewTaskManager(db.GetDB(), cfg)
+	_ = tasks.NewRepositoryTaskManager(userRepo, nil, nil, nil, nil)
 
 	// Initialize services
 	authService := domain.NewAuthService(userRepo)
 
 	// Initialize handlers
-	authHandler := api.NewAuthHandler(authService)
+	authHandler := api.NewAuthHandler(authService, cfg)
 
 	// Setup routes
 	r := chi.NewRouter()
@@ -147,12 +163,24 @@ func main() {
 		})
 	})
 
-	// Start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	// Task management routes (for development/testing)
+	r.Route("/tasks", func(r chi.Router) {
+		r.Use(api.AuthMiddleware)
+		r.Post("/test", func(w http.ResponseWriter, r *http.Request) {
+			// Test task execution
+			err := taskManager.ExecuteTask(r.Context(), "test-task", map[string]interface{}{
+				"message": "Hello from task manager",
+			})
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Task executed successfully"))
+		})
+	})
 
-	log.Printf("Server starting on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	// Start server
+	log.Printf("Server starting on port %s", cfg.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
 }

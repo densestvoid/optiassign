@@ -9,11 +9,8 @@ import (
 
 // Migrate runs database migrations using Goose
 func Migrate(db *sql.DB, migrationsDir string) error {
-	// Set the migrations directory
-	goose.SetBaseDir(migrationsDir)
-	
 	// Run migrations
-	if err := goose.Up(db, "."); err != nil {
+	if err := goose.Up(db, migrationsDir); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 	
@@ -22,9 +19,7 @@ func Migrate(db *sql.DB, migrationsDir string) error {
 
 // MigrateDown rolls back migrations
 func MigrateDown(db *sql.DB, migrationsDir string) error {
-	goose.SetBaseDir(migrationsDir)
-	
-	if err := goose.Down(db, "."); err != nil {
+	if err := goose.Down(db, migrationsDir); err != nil {
 		return fmt.Errorf("failed to rollback migrations: %w", err)
 	}
 	
@@ -32,13 +27,11 @@ func MigrateDown(db *sql.DB, migrationsDir string) error {
 }
 
 // GetMigrationStatus returns the current migration status
-func GetMigrationStatus(db *sql.DB, migrationsDir string) ([]goose.MigrationRecord, error) {
-	goose.SetBaseDir(migrationsDir)
-	
-	records, err := goose.GetDBVersion(db)
+func GetMigrationStatus(db *sql.DB, migrationsDir string) (int64, error) {
+	version, err := goose.GetDBVersion(db)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get migration status: %w", err)
+		return 0, fmt.Errorf("failed to get migration status: %w", err)
 	}
 	
-	return []goose.MigrationRecord{{Version: records}}, nil
+	return version, nil
 }
