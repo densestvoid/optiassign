@@ -1,0 +1,29 @@
+# OptiAssign DigitalOcean Variables Example
+# Copy this file to terraform.tfvars and fill in your values
+
+# DigitalOcean Configuration
+do_token = "your-digitalocean-api-token"
+region = "nyc3"
+environment = "production"
+app_name = "optiassign"
+
+# Database Configuration
+db_password = "your-secure-database-password"
+db_size = "db-s-1vcpu-1gb"
+
+# Google OAuth Configuration
+google_client_id = "your-google-client-id"
+google_client_secret = "your-google-client-secret"
+
+# Session Configuration
+session_secret = "your-session-secret-key"
+
+# GitHub Configuration (for App Platform)
+github_repo = "your-username/optiassign"
+github_branch = "main"
+
+# App Configuration
+app_size = "basic-xxs"
+
+# Optional: Domain Configuration
+# domain_name = "optiassign.example.com"
