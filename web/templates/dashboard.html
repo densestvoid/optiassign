@@ -1,0 +1,28 @@
+{{define "dashboard"}}
+<div class="row">
+    <div class="col-12">
+        <h1>Dashboard</h1>
+        <p>Welcome, {{.Session.Name}}!</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Create New Group</h5>
+                        <p class="card-text">Start a new assignment group</p>
+                        <a class="btn btn-primary" href="/groups/new">Create Group</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Groups</h5>
+                        <p class="card-text">View and manage your groups</p>
+                        <a class="btn btn-secondary" href="/groups">View Groups</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

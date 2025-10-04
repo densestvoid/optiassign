@@ -1,0 +1,56 @@
+name: optiassign-production
+region: nyc3
+
+services:
+- name: backend
+  source_dir: /
+  github:
+    repo: your-username/optiassign
+    branch: main
+    deploy_on_push: true
+
+  build_command: go build -o main ./cmd/server
+  run_command: ./main
+
+  instance_count: 1
+  instance_size_slug: basic-xxs
+
+  envs:
+  - key: PORT
+    value: "8080"
+  - key: EMAIL_LOG_TO_CONSOLE
+    value: "true"
+  - key: DB_HOST
+    value: ${optiassign-db.HOSTNAME}
+  - key: DB_PORT
+    value: ${optiassign-db.PORT}
+  - key: DB_NAME
+    value: ${optiassign-db.DATABASE}
+  - key: DB_USER
+    value: ${optiassign-db.USERNAME}
+  - key: DB_PASSWORD
+    value: ${optiassign-db.PASSWORD}
+  - key: GOOGLE_CLIENT_ID
+    value: ${GOOGLE_CLIENT_ID}
+  - key: GOOGLE_CLIENT_SECRET
+    value: ${GOOGLE_CLIENT_SECRET}
+  - key: SESSION_SECRET
+    value: ${SESSION_SECRET}
+
+  routes:
+  - path: /
+
+  health_check:
+    http_path: /
+    initial_delay_seconds: 10
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
+
+databases:
+- name: optiassign-db
+  engine: PG
+  version: "15"
+  size: db-s-1vcpu-1gb
+  num_nodes: 1

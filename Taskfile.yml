@@ -1,0 +1,170 @@
+version: '3'
+
+vars:
+  GO_VERSION: "1.21"
+  APP_NAME: "optiassign"
+  PORT: "8080"
+
+tasks:
+  # Development tasks
+  dev:
+    desc: "Start development server"
+    cmds:
+      - go run cmd/server/main.go
+    env:
+      PORT: "{{.PORT}}"
+
+  task:
+    desc: "Run Task (go-tasks) using go tool"
+    cmds:
+      - go tool task {{.CLI_ARGS}}
+    vars:
+      CLI_ARGS: ""
+
+  build:
+    desc: "Build the application"
+    cmds:
+      - go build -o bin/{{.APP_NAME}} cmd/server/main.go
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - go test -v ./...
+
+  test-coverage:
+    desc: "Run tests with coverage"
+    cmds:
+      - go test -v -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+
+  lint:
+    desc: "Run linter"
+    cmds:
+      - go vet ./...
+      - go fmt ./...
+
+  # Database tasks
+  db-migrate:
+    desc: "Run database migrations"
+    cmds:
+      - go tool goose -dir migrations up
+
+  db-rollback:
+    desc: "Rollback database migrations"
+    cmds:
+      - go tool goose -dir migrations down
+
+  db-status:
+    desc: "Check migration status"
+    cmds:
+      - go tool goose -dir migrations status
+
+  db-reset:
+    desc: "Reset database (rollback all migrations)"
+    cmds:
+      - go tool goose -dir migrations down
+      - go tool goose -dir migrations up
+
+  # Docker tasks
+  docker-build:
+    desc: "Build Docker image"
+    cmds:
+      - docker build -t {{.APP_NAME}}:latest .
+
+  docker-run:
+    desc: "Run application in Docker"
+    cmds:
+      - docker run -p {{.PORT}}:{{.PORT}} --env-file .env {{.APP_NAME}}:latest
+
+  docker-compose-up:
+    desc: "Start services with docker-compose"
+    cmds:
+      - docker-compose up -d
+
+  docker-compose-down:
+    desc: "Stop services with docker-compose"
+    cmds:
+      - docker-compose down
+
+  docker-compose-logs:
+    desc: "View docker-compose logs"
+    cmds:
+      - docker-compose logs -f
+
+  # Setup tasks
+  setup:
+    desc: "Setup development environment"
+    cmds:
+      - cp .env.example .env
+      - echo "Please edit .env file with your Google OAuth credentials"
+      - echo "Then run task docker-compose-up"
+      - echo "Then run task db-migrate"
+
+  install-deps:
+    desc: "Install dependencies"
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  install-tools:
+    desc: "Install Go tools (Task, Goose) using go get -tool"
+    cmds:
+      - go get -tool github.com/go-task/task/v3/cmd/task@latest
+      - go get -tool github.com/pressly/goose/v3/cmd/goose@latest
+      - echo "Tools installed! Use 'go tool task' and 'go tool goose' to run them"
+
+  # Cleanup tasks
+  clean:
+    desc: "Clean build artifacts"
+    cmds:
+      - rm -rf bin/
+      - rm -f coverage.out coverage.html
+      - go clean
+
+  clean-docker:
+    desc: "Clean Docker resources"
+    cmds:
+      - docker-compose down -v
+      - docker system prune -f
+
+  # Utility tasks
+  fmt:
+    desc: "Format Go code"
+    cmds:
+      - go fmt ./...
+
+  mod-tidy:
+    desc: "Tidy Go modules"
+    cmds:
+      - go mod tidy
+
+  # Development workflow
+  dev-setup:
+    desc: "Complete development setup"
+    deps: [install-deps, setup]
+    cmds:
+      - echo "✅ Development setup complete!"
+      - echo "Next steps:"
+      - echo "1. Edit .env file with your Google OAuth credentials"
+      - echo "2. Run task docker-compose-up"
+      - echo "3. Run task db-migrate"
+      - echo "4. Run task dev"
+
+  # Production tasks
+  prod-build:
+    desc: "Build for production"
+    cmds:
+      - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/{{.APP_NAME}} cmd/server/main.go
+      - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/migrate cmd/migrate/main.go
+
+  # Health check
+  health:
+    desc: "Check application health"
+    cmds:
+      - curl -f http://localhost:{{.PORT}}/ || echo "Application not running"
+
+  # Default task
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - task --list

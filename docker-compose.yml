@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: optiassign
+      POSTGRES_USER: optiassign
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://optiassign:password@postgres:5432/optiassign?sslmode=disable
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: http://localhost:8080/auth/google/callback
+      PORT: 8080
+      SESSION_SECRET: your_session_secret_key
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+
+volumes:
+  postgres_data:
