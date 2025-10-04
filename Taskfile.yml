@@ -25,7 +25,6 @@ tasks:
     desc: "Build the application"
     cmds:
       - go build -o bin/{{.APP_NAME}} cmd/server/main.go
-      - go build -o bin/migrate cmd/migrate/main.go
 
   test:
     desc: "Run tests"
@@ -37,7 +36,6 @@ tasks:
     cmds:
       - go test -v -coverprofile=coverage.out ./...
       - go tool cover -html=coverage.out -o coverage.html
-      - echo "Coverage report generated: coverage.html"
 
   lint:
     desc: "Run linter"
@@ -98,9 +96,9 @@ tasks:
     desc: "Setup development environment"
     cmds:
       - cp .env.example .env
-      - echo "⚠️  Please edit .env file with your Google OAuth credentials"
-      - echo "Then run: task docker-compose-up"
-      - echo "Then run: task db-migrate"
+      - echo "Please edit .env file with your Google OAuth credentials"
+      - echo "Then run task docker-compose-up"
+      - echo "Then run task db-migrate"
 
   install-deps:
     desc: "Install dependencies"
@@ -148,9 +146,9 @@ tasks:
       - echo "✅ Development setup complete!"
       - echo "Next steps:"
       - echo "1. Edit .env file with your Google OAuth credentials"
-      - echo "2. Run: task docker-compose-up"
-      - echo "3. Run: task db-migrate"
-      - echo "4. Run: task dev"
+      - echo "2. Run task docker-compose-up"
+      - echo "3. Run task db-migrate"
+      - echo "4. Run task dev"
 
   # Production tasks
   prod-build:
