@@ -214,8 +214,8 @@ doctl apps logs <app-id> --follow
 |----------|------|------|
 | App Platform | Basic XXS | $5 |
 | Managed Database | 1GB RAM | $15 |
-| Container Registry | 5GB | $5 |
-| **Total** | | **$25/month** |
+| GitHub Container Registry | Free | $0 |
+| **Total** | | **$20/month** |
 
 ### Scaling Options
 

@@ -26,10 +26,7 @@ output "database_user" {
   value       = digitalocean_database_user.main.name
 }
 
-output "container_registry" {
-  description = "Container registry endpoint"
-  value       = digitalocean_container_registry.main.server_url
-}
+# Note: Using GitHub Container Registry (ghcr.io) - no additional output needed
 
 output "vpc_id" {
   description = "VPC ID"

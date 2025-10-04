@@ -24,6 +24,7 @@ echo -e "${YELLOW}📋 Checking prerequisites...${NC}"
 command -v doctl >/dev/null 2>&1 || { echo -e "${RED}❌ DigitalOcean CLI (doctl) is required but not installed.${NC}"; exit 1; }
 command -v terraform >/dev/null 2>&1 || { echo -e "${RED}❌ Terraform is required but not installed.${NC}"; exit 1; }
 command -v docker >/dev/null 2>&1 || { echo -e "${RED}❌ Docker is required but not installed.${NC}"; exit 1; }
+command -v gh >/dev/null 2>&1 || { echo -e "${RED}❌ GitHub CLI (gh) is required but not installed.${NC}"; exit 1; }
 
 echo -e "${GREEN}✅ All prerequisites found${NC}"
 
@@ -31,6 +32,11 @@ echo -e "${GREEN}✅ All prerequisites found${NC}"
 echo -e "${YELLOW}🔐 Checking DigitalOcean credentials...${NC}"
 doctl auth list >/dev/null 2>&1 || { echo -e "${RED}❌ DigitalOcean credentials not configured. Run 'doctl auth init'${NC}"; exit 1; }
 echo -e "${GREEN}✅ DigitalOcean credentials configured${NC}"
+
+# Check GitHub credentials
+echo -e "${YELLOW}🔐 Checking GitHub credentials...${NC}"
+gh auth status >/dev/null 2>&1 || { echo -e "${RED}❌ GitHub credentials not configured. Run 'gh auth login'${NC}"; exit 1; }
+echo -e "${GREEN}✅ GitHub credentials configured${NC}"
 
 # Check if terraform.tfvars exists
 if [ ! -f "${TERRAFORM_DIR}/terraform.tfvars" ]; then
@@ -44,6 +50,31 @@ if [ ! -f "${TERRAFORM_DIR}/terraform.tfvars" ]; then
     echo "  - github_repo: Your GitHub repository (format: owner/repo)"
     exit 1
 fi
+
+# Build and push Docker image to GitHub Container Registry
+echo -e "${YELLOW}🐳 Building and pushing Docker image to GitHub Container Registry...${NC}"
+
+# Get GitHub repository info
+GITHUB_REPO=$(grep 'github_repo' terraform.tfvars | cut -d'"' -f2)
+GITHUB_OWNER=$(echo $GITHUB_REPO | cut -d'/' -f1)
+GITHUB_REPO_NAME=$(echo $GITHUB_REPO | cut -d'/' -f2)
+
+# Get GitHub token from terraform.tfvars
+GITHUB_TOKEN=$(grep 'github_token' terraform.tfvars | cut -d'"' -f2)
+
+# Login to GitHub Container Registry
+echo -e "${YELLOW}🔑 Logging in to GitHub Container Registry...${NC}"
+echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_OWNER --password-stdin
+
+# Build Docker image
+echo -e "${YELLOW}🔨 Building Docker image...${NC}"
+docker build -t ghcr.io/${GITHUB_REPO}/optiassign:latest .
+
+# Push image
+echo -e "${YELLOW}📤 Pushing Docker image...${NC}"
+docker push ghcr.io/${GITHUB_REPO}/optiassign:latest
+
+echo -e "${GREEN}✅ Docker image pushed to GitHub Container Registry${NC}"
 
 # Deploy infrastructure with Terraform
 echo -e "${YELLOW}🏗️  Deploying infrastructure with Terraform...${NC}"

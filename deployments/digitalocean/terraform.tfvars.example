@@ -18,9 +18,10 @@ google_client_secret = "your-google-client-secret"
 # Session Configuration
 session_secret = "your-session-secret-key"
 
-# GitHub Configuration (for App Platform)
+# GitHub Configuration (for App Platform and Container Registry)
 github_repo = "your-username/optiassign"
 github_branch = "main"
+github_token = "your-github-token"  # For GitHub Container Registry
 
 # App Configuration
 app_size = "basic-xxs"

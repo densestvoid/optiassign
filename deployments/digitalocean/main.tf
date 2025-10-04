@@ -105,12 +105,8 @@ resource "digitalocean_database_db" "main" {
   name       = "optiassign"
 }
 
-# Container Registry
-resource "digitalocean_container_registry" "main" {
-  name                   = "${var.app_name}-${var.environment}-registry"
-  subscription_tier_slug = "starter"
-  region                 = var.region
-}
+# Note: Using GitHub Container Registry (ghcr.io) instead of DigitalOcean registry
+# This saves costs and simplifies the deployment process
 
 # App Platform App
 resource "digitalocean_app" "main" {

@@ -211,7 +211,7 @@ go tool task db-migrate
 ### Infrastructure
 - **DigitalOcean App Platform** for serverless application hosting
 - **Managed PostgreSQL Database** for data storage
-- **Container Registry** for Docker images
+- **GitHub Container Registry** for Docker images (free)
 - **VPC** for network isolation
 - **Firewall** for security
 
