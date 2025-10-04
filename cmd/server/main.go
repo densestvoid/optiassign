@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -63,12 +64,15 @@ func main() {
 	taskManager.RegisterHandler("assignment", assignmentTaskHandler)
 	taskManager.Start()
 
+	// Initialize metrics collector (for future use)
+	_ = domain.GetGlobalMetrics()
+
 	// Initialize assignment service
 	assignmentService := domain.NewAssignmentService(groupRepo, participantRepo, prioritizationRepo, taskManager)
 
 	// Initialize handlers
 	authHandler := api.NewAuthHandler(authService, cfg)
-	groupHandler := api.NewGroupHandler(groupService, userRepo, assignmentAlgorithm, emailService)
+	groupHandler := api.NewGroupHandler(groupService, userRepo, assignmentAlgorithm, emailService, itemRepo)
 	participantHandler := api.NewParticipantHandler(groupService, prioritizationRepo, participantRepo, itemRepo, assignmentService)
 	assignmentHandler := api.NewAssignmentHandler(groupService, assignmentRepo, participantRepo, itemRepo, assignmentService)
 
@@ -76,6 +80,13 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	
+	// Add rate limiting
+	rateLimiter := api.NewRateLimiter(100, time.Minute) // 100 requests per minute
+	r.Use(api.RateLimitMiddleware(rateLimiter))
+	
+	// Add CSRF protection
+	r.Use(api.CSRFProtectionMiddleware())
 
 	// Public routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +208,21 @@ func main() {
 		r.Get("/{token}/status", participantHandler.AssignmentStatus)
 		r.Get("/{token}/results", assignmentHandler.ParticipantResults)
 	})
+
+	// SSE routes for real-time updates
+	r.Get("/sse", api.GetSSEManager().SSEHandler)
+
+	// Health check routes
+	healthChecker := api.NewHealthChecker(db.GetDB())
+	r.Get("/health", healthChecker.HealthCheck)
+	r.Get("/ready", healthChecker.ReadinessCheck)
+	r.Get("/live", healthChecker.LivenessCheck)
+	r.Get("/metrics", healthChecker.MetricsHandler)
+
+	// Monitoring routes
+	monitoringHandler := api.NewMonitoringHandler(domain.GetGlobalMetrics())
+	r.Get("/monitoring", monitoringHandler.Dashboard)
+	r.Get("/api/monitoring/metrics", monitoringHandler.MetricsAPI)
 
 	// Task management is handled by Taskfile.yml
 

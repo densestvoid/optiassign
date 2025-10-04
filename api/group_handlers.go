@@ -17,15 +17,17 @@ type GroupHandler struct {
 	userRepo          domain.UserRepository
 	assignmentAlgorithm *domain.AssignmentAlgorithm
 	emailService      *domain.EmailService
+	itemRepo          domain.ItemRepository
 }
 
 // NewGroupHandler creates a new group handler
-func NewGroupHandler(groupService *domain.GroupService, userRepo domain.UserRepository, assignmentAlgorithm *domain.AssignmentAlgorithm, emailService *domain.EmailService) *GroupHandler {
+func NewGroupHandler(groupService *domain.GroupService, userRepo domain.UserRepository, assignmentAlgorithm *domain.AssignmentAlgorithm, emailService *domain.EmailService, itemRepo domain.ItemRepository) *GroupHandler {
 	return &GroupHandler{
 		groupService:        groupService,
 		userRepo:            userRepo,
 		assignmentAlgorithm: assignmentAlgorithm,
 		emailService:        emailService,
+		itemRepo:            itemRepo,
 	}
 }
 
@@ -257,9 +259,13 @@ func (h *GroupHandler) ExecuteAssignment(w http.ResponseWriter, r *http.Request)
 	// Send email notifications to participants
 	participants, err := h.groupService.GetGroupParticipants(r.Context(), groupID)
 	if err == nil {
-		baseURL := "http://localhost:8080" // In production, this should come from config
-		for _, participant := range participants {
-			h.emailService.SendAssignmentNotification(participant, group, result.Assignments, baseURL)
+		// Get items for email notifications
+		items, err := h.itemRepo.GetByGroupID(groupID)
+		if err == nil {
+			baseURL := "http://localhost:8080" // In production, this should come from config
+			for _, participant := range participants {
+				h.emailService.SendAssignmentNotification(participant, group, result.Assignments, items, baseURL)
+			}
 		}
 	}
 

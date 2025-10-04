@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -109,7 +111,7 @@ func (h *HealthChecker) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		"timestamp": time.Now().Unix(),
 		"uptime":    time.Since(startTime).Seconds(),
 		"version":   "1.0.0",
-		"environment": GetEnvironment(),
+		"environment": "production",
 	}
 	
 	w.Header().Set("Content-Type", "application/json")

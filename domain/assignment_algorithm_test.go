@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"testing"
-	"time"
 )
 
 // Mock repositories for testing
@@ -20,6 +19,24 @@ func (m *mockGroupRepo) Update(group *Group) error {
 	return nil
 }
 
+func (m *mockGroupRepo) Create(group *Group) error {
+	m.groups[group.ID] = group
+	return nil
+}
+
+func (m *mockGroupRepo) Delete(id int) error {
+	delete(m.groups, id)
+	return nil
+}
+
+func (m *mockGroupRepo) GetByOwner(ownerID int) ([]*Group, error) {
+	var groups []*Group
+	for _, group := range m.groups {
+		groups = append(groups, group)
+	}
+	return groups, nil
+}
+
 type mockItemRepo struct {
 	items map[int][]*Item
 }
@@ -28,12 +45,114 @@ func (m *mockItemRepo) GetByGroupID(groupID int) ([]*Item, error) {
 	return m.items[groupID], nil
 }
 
+func (m *mockItemRepo) Create(item *Item) error {
+	m.items[item.GroupID] = append(m.items[item.GroupID], item)
+	return nil
+}
+
+func (m *mockItemRepo) Update(item *Item) error {
+	// Update item in the slice
+	for i, existingItem := range m.items[item.GroupID] {
+		if existingItem.ID == item.ID {
+			m.items[item.GroupID][i] = item
+			break
+		}
+	}
+	return nil
+}
+
+func (m *mockItemRepo) Delete(id int) error {
+	// Remove item from all groups
+	for groupID, items := range m.items {
+		for i, item := range items {
+			if item.ID == id {
+				m.items[groupID] = append(items[:i], items[i+1:]...)
+				break
+			}
+		}
+	}
+	return nil
+}
+
+func (m *mockItemRepo) DeleteByGroupID(groupID int) error {
+	delete(m.items, groupID)
+	return nil
+}
+
+func (m *mockItemRepo) GetByID(id int) (*Item, error) {
+	for _, items := range m.items {
+		for _, item := range items {
+			if item.ID == id {
+				return item, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
 type mockParticipantRepo struct {
 	participants map[int][]*Participant
 }
 
 func (m *mockParticipantRepo) GetByGroupID(groupID int) ([]*Participant, error) {
 	return m.participants[groupID], nil
+}
+
+func (m *mockParticipantRepo) Create(participant *Participant) error {
+	m.participants[participant.GroupID] = append(m.participants[participant.GroupID], participant)
+	return nil
+}
+
+func (m *mockParticipantRepo) Update(participant *Participant) error {
+	// Update participant in the slice
+	for i, existingParticipant := range m.participants[participant.GroupID] {
+		if existingParticipant.ID == participant.ID {
+			m.participants[participant.GroupID][i] = participant
+			break
+		}
+	}
+	return nil
+}
+
+func (m *mockParticipantRepo) Delete(id int) error {
+	// Remove participant from all groups
+	for groupID, participants := range m.participants {
+		for i, participant := range participants {
+			if participant.ID == id {
+				m.participants[groupID] = append(participants[:i], participants[i+1:]...)
+				break
+			}
+		}
+	}
+	return nil
+}
+
+func (m *mockParticipantRepo) DeleteByGroupID(groupID int) error {
+	delete(m.participants, groupID)
+	return nil
+}
+
+func (m *mockParticipantRepo) GetByToken(token string) (*Participant, error) {
+	for _, participants := range m.participants {
+		for _, participant := range participants {
+			if participant.Token == token {
+				return participant, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
+func (m *mockParticipantRepo) GetByUserID(userID int) ([]*Participant, error) {
+	var userParticipants []*Participant
+	for _, participants := range m.participants {
+		for _, participant := range participants {
+			if participant.UserID == userID {
+				userParticipants = append(userParticipants, participant)
+			}
+		}
+	}
+	return userParticipants, nil
 }
 
 type mockPrioritizationRepo struct {
@@ -47,6 +166,40 @@ func (m *mockPrioritizationRepo) HasSubmitted(participantID int) (bool, error) {
 
 func (m *mockPrioritizationRepo) GetByParticipantID(participantID int) ([]*Prioritization, error) {
 	return m.prioritizations[participantID], nil
+}
+
+func (m *mockPrioritizationRepo) Create(prioritization *Prioritization) error {
+	m.prioritizations[prioritization.ParticipantID] = append(m.prioritizations[prioritization.ParticipantID], prioritization)
+	return nil
+}
+
+func (m *mockPrioritizationRepo) Update(prioritization *Prioritization) error {
+	// Update prioritization in the slice
+	for i, existingPrioritization := range m.prioritizations[prioritization.ParticipantID] {
+		if existingPrioritization.ItemID == prioritization.ItemID {
+			m.prioritizations[prioritization.ParticipantID][i] = prioritization
+			break
+		}
+	}
+	return nil
+}
+
+func (m *mockPrioritizationRepo) Delete(participantID int) error {
+	delete(m.prioritizations, participantID)
+	return nil
+}
+
+func (m *mockPrioritizationRepo) DeleteByGroupID(groupID int) error {
+	// Clear all prioritizations for participants in this group
+	for participantID := range m.prioritizations {
+		delete(m.prioritizations, participantID)
+	}
+	return nil
+}
+
+func (m *mockPrioritizationRepo) DeleteByParticipantID(participantID int) error {
+	delete(m.prioritizations, participantID)
+	return nil
 }
 
 type mockAssignmentRepo struct {
@@ -65,6 +218,16 @@ func (m *mockAssignmentRepo) Create(assignment *Assignment) error {
 
 func (m *mockAssignmentRepo) GetByGroupID(groupID int) ([]*Assignment, error) {
 	return m.assignments, nil
+}
+
+func (m *mockAssignmentRepo) GetByParticipantID(participantID int) ([]*Assignment, error) {
+	var participantAssignments []*Assignment
+	for _, assignment := range m.assignments {
+		if assignment.ParticipantID == participantID {
+			participantAssignments = append(participantAssignments, assignment)
+		}
+	}
+	return participantAssignments, nil
 }
 
 func TestAssignmentAlgorithm_EqualDistribution(t *testing.T) {

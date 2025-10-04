@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"html/template"
 	"strings"
 )
