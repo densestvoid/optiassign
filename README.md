@@ -36,10 +36,10 @@ A web application for group-based, randomized, prioritized, snaking-draft item a
 - ✅ Personalized email notifications with assigned items
 - ✅ Detailed item information in assignment emails
 - ✅ Enhanced email templates with item descriptions
-- ✅ **NEW**: Assignment results display pages
-- ✅ **NEW**: Production-ready Docker deployment
-- ✅ **NEW**: Complete Terraform infrastructure
-- ✅ **NEW**: Automated deployment scripts
+- ✅ Assignment results display pages
+- ✅ Production-ready Docker deployment
+- ✅ DigitalOcean Terraform infrastructure
+- ✅ Automated DigitalOcean deployment scripts
 
 ## Setup
 
@@ -192,8 +192,8 @@ go tool task clean-docker     # Clean Docker resources
 
 ### Quick Start
 ```bash
-# Deploy to AWS with Terraform
-./deployments/deploy.sh
+# Deploy to DigitalOcean with Terraform
+./deployments/digitalocean/deploy.sh
 ```
 
 ### Manual Deployment
@@ -209,11 +209,11 @@ go tool task db-migrate
 ```
 
 ### Infrastructure
-- **AWS ECS Fargate** for containerized application
-- **Application Load Balancer** for traffic distribution
-- **RDS PostgreSQL** for database
-- **CloudWatch** for logging and monitoring
-- **VPC** with public/private subnets for security
+- **DigitalOcean App Platform** for serverless application hosting
+- **Managed PostgreSQL Database** for data storage
+- **Container Registry** for Docker images
+- **VPC** for network isolation
+- **Firewall** for security
 
 ## Project Complete! 🎉
 
